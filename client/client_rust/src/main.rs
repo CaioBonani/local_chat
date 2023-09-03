@@ -24,7 +24,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         stream.read(&mut response).await?;
 
         let response_str = String::from_utf8_lossy(&response);
-        println!("Resposta do servidor: {}", response_str);
+        println!("{}", response_str);
     }
 
     Ok(())
