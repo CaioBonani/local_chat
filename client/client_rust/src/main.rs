@@ -1,4 +1,3 @@
-//teste
 use tokio::net::TcpStream;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
