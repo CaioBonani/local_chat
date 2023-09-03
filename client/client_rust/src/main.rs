@@ -9,6 +9,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Conectado a {}", addr);
 
     loop {
+        
         let mut input = String::new();
         println!("Digite uma mensagem (ou 'quit' para sair): ");
         std::io::stdin().read_line(&mut input)?;
