@@ -18,15 +18,17 @@ public class client {
             System.out.print("Digite seu nome: ");
             String userName = stdIn.readLine(); // Solicita ao usuário que digite seu nome
 
+            out.println(userName);
+
             String userInput;
             while (true) {// Enquanto o usuário não digitar "quit", o loop continua
                 userInput = stdIn.readLine();
                 if (userInput == null || userInput.equals("quit")) {
                     break;
                 }
-                out.println(userName + ": " + userInput); // Envia o nome do usuário junto com a mensagem
-                //String serverResponse = in.readLine(); // Lê a resposta do servidor
-                //System.out.println("Resposta do servidor: " + serverResponse);
+                out.println(userInput); // Envia o nome do usuário junto com a mensagem
+                String serverResponse = in.readLine(); // Lê a resposta do servidor
+                System.out.println("Resposta do servidor: " + serverResponse);
             }
         } catch (UnknownHostException e) {// Tratamento de exceções
             System.err.println("Erro: não foi possível encontrar o host.");
