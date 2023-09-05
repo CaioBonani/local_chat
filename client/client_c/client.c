@@ -40,6 +40,7 @@ int main(){
     
     printf("Digite o seu usuário: ");
     scanf("%s", user);
+    send(server, user, strlen(user), 0);
 
     printf("PARABÉNS %s .... Você está conectado no Servidor...\n", user);
         
