@@ -10,30 +10,39 @@ public class client {
     public static void main(String[] args) {
 
         try (
-            Socket echoSocket = new Socket("127.0.0.1", 8080);// Cria um socket para se conectar ao servidor
-            PrintWriter out = new PrintWriter(echoSocket.getOutputStream(), true);// Cria um PrintWriter para enviar mensagens ao servidor
-            BufferedReader in = new BufferedReader(new InputStreamReader(echoSocket.getInputStream()));// Cria um BufferedReader para ler mensagens do servidor
-            BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in))// Cria um BufferedReader para ler mensagens do usuário
+            Socket echoSocket = new Socket("127.0.0.1", 8080);
+            PrintWriter out = new PrintWriter(echoSocket.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(echoSocket.getInputStream()));
+            BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in))
         ) {
             System.out.print("Digite seu nome: ");
-            String userName = stdIn.readLine(); // Solicita ao usuário que digite seu nome
-
+            String userName = stdIn.readLine();
             out.println(userName);
 
+            Thread receiveThread = new Thread(() -> {
+                try {
+                    String serverResponse;
+                    while ((serverResponse = in.readLine()) != null) {
+                        System.out.println(serverResponse);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            receiveThread.start();
+
             String userInput;
-            while (true) {// Enquanto o usuário não digitar "quit", o loop continua
+            while (true) {
                 userInput = stdIn.readLine();
                 if (userInput == null || userInput.equals("quit")) {
                     break;
                 }
-                out.println(userInput); // Envia o nome do usuário junto com a mensagem
-                String serverResponse = in.readLine(); // Lê a resposta do servidor
-                System.out.println("Resposta do servidor: " + serverResponse);
+                out.println(userInput);
             }
-        } catch (UnknownHostException e) {// Tratamento de exceções
+        } catch (UnknownHostException e) {
             System.err.println("Erro: não foi possível encontrar o host.");
             System.exit(1);
-        } catch (IOException e) {// Tratamento de exceções
+        } catch (IOException e) {
             System.err.println("Erro: não foi possível obter E/S para a conexão.");
             System.err.println("Certifique-se de que o servidor esteja em execução e verifique o nome do host e a porta.");
             System.exit(1);
