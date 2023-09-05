@@ -9,37 +9,37 @@ public class client {
 
     public static void main(String[] args) {
 
-        try (
+        try (//cria um socket para se conectar ao servidor
             Socket echoSocket = new Socket("127.0.0.1", 8080);
             PrintWriter out = new PrintWriter(echoSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(echoSocket.getInputStream()));
             BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in))
         ) {
             System.out.print("Digite seu nome: ");
-            String userName = stdIn.readLine();
-            out.println(userName);
+            String userName = stdIn.readLine();//lê o nome do usuário
+            out.println(userName);//envia o nome do usuário para o servidor
 
-            Thread receiveThread = new Thread(() -> {
-                try {
+            Thread receiveThread = new Thread(() -> {//thread para receber mensagens do servidor
+                try {//recebe mensagens do servidor e imprime na tela
                     String serverResponse;
-                    while ((serverResponse = in.readLine()) != null) {
-                        System.out.println(serverResponse);
+                    while ((serverResponse = in.readLine()) != null) {//enquanto o servidor enviar mensagens
+                        System.out.println(serverResponse);//imprime na tela
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException e) {//caso ocorra algum erro
+                    e.printStackTrace();//imprime o erro
                 }
             });
-            receiveThread.start();
+            receiveThread.start();//inicia a thread
 
             String userInput;
-            while (true) {
+            while (true) {//enquanto o usuário não digitar quit
                 userInput = stdIn.readLine();
                 if (userInput == null || userInput.equals("quit")) {
                     break;
                 }
-                out.println(userInput);
+                out.println(userInput);//envia a mensagem para o servidor
             }
-        } catch (UnknownHostException e) {
+        } catch (UnknownHostException e) {//caso ocorra algum erro
             System.err.println("Erro: não foi possível encontrar o host.");
             System.exit(1);
         } catch (IOException e) {
