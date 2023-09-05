@@ -4,11 +4,11 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
 
-//teste comentario git
 
-
-#define MAXCHAR 250
+#define MAXNAME 50
+#define MAXCHAR 500
 #define PORT 8080
 
 int main(){
@@ -23,7 +23,7 @@ int main(){
     int server = socket(AF_INET, SOCK_STREAM, 0);
 
     if(server < 0){
-        printf("Erro No Socket!\n");
+        perror("Erro No Socket!\n");
         exit(EXIT_FAILURE);
     }
 
@@ -32,20 +32,38 @@ int main(){
     int cliente_fd;
 
     if ((cliente_fd = connect(server, (struct sockaddr*)&server_address, sizeof(server_address))) < 0){
-        printf("Falha na Conexão\n");
+        perror("Falha na Conexão ");
         exit(EXIT_FAILURE);
     }
 
-    printf("Cliente conectado com o Servidor...\n");
-    char buff[MAXCHAR] = "Mensagem Teste enviada pelo cliente";
+    char user[MAXNAME];
+    
+    printf("Digite o seu usuário: ");
+    scanf("%s", user);
 
-    send(server, buff, strlen(buff), 0);
+    printf("PARABÉNS %s .... Você está conectado no Servidor...\n", user);
+        
+    char buff[MAXCHAR];
+    int i = 0;
 
-    printf("Cliente enviou a Mensagem........\n");
-    char buffer[MAXCHAR];
-    read(server, buffer, MAXCHAR);
+    while(1){
+        printf("Digite a Mensagem: ");
+        scanf("%s", buff);
 
-    printf("Cliente --> Resposta Enviada Pelo Servidor = %s\n", buffer);
+        if(strcmp(buff, "Exit") == 0){
+            strcpy(buff, "Desconectado do Servidor...\n");
+            printf("%s\n", buff);
+            send(server, buff, strlen(buff), 0);
+            break;
+        }
+
+        send(server, buff, strlen(buff), 0);
+
+        char buffer[MAXCHAR];
+        read(server, buffer, MAXCHAR);
+        printf("%s\n",buffer );
+    }
+
     close(cliente_fd);
 
     return 0;

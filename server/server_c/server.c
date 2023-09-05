@@ -7,6 +7,7 @@
 #include <paths.h>
 
 #define MAXCHAR 250
+#define MAXCLIENT 100
 #define PORT 8080
 
 int main(){
@@ -39,32 +40,54 @@ int main(){
 
     printf("Listening...\n");
 
-    int cliente_fd;
+    int cliente_fd[MAXCLIENT];
     char buffer[MAXCHAR];
 
     struct sockaddr_in cliente_address;
     socklen_t addrlen_size;
 
-    addrlen_size = sizeof(cliente_address);
+    int i = 0;
+    while ((cliente_fd[i] = accept(server_fd,(struct sockaddr *)&cliente_address,&addrlen_size))){
+        if (cliente_fd[i] < 0){
+            printf("Falha no Accept!!");
+            exit(EXIT_FAILURE);
+        }
+        printf("Cliente Conectado!!\n");
+        
+        recv(cliente_fd[i], buffer, MAXCHAR, 0);
 
-    if((cliente_fd = accept(server_fd, (struct sockaddr*)&cliente_address, &addrlen_size)) < 0){
-        printf("Falha no Accept!!");
-        exit(EXIT_FAILURE);
+        printf("Servidor --> Requisição Feita ao Servidor = %s\n", buffer);
+
+        char buff[MAXCHAR] = "Mensagem Teste Recebida!!!";
+
+        printf("Servidor Respondendo o Cliente......!");
+
+        send(cliente_fd[i], buff, strlen(buff), 0);
+
+        close(cliente_fd[i]);
+        i++;
     }
 
-    recv(cliente_fd, buffer, MAXCHAR, 0);
-    //read(cliente_fd, buff, MAXCHAR);
-    printf("Servidor --> Requisição Feita ao Servidor = %s\n", buffer);
+    // addrlen_size = sizeof(cliente_address);
+
+    // if((cliente_fd = accept(server_fd, (struct sockaddr*)&cliente_address, &addrlen_size)) < 0){
+    //     printf("Falha no Accept!!");
+    //     exit(EXIT_FAILURE);
+    // }
+
+    // recv(cliente_fd, buffer, MAXCHAR, 0);
+    // //read(cliente_fd, buff, MAXCHAR);
+    // printf("Servidor --> Requisição Feita ao Servidor = %s\n", buffer);
     
-    char buff[MAXCHAR] = "Mensagem Teste Recebida!!!";
+    // char buff[MAXCHAR] = "Mensagem Teste Recebida!!!";
     
-    printf("Servidor Respondendo o Cliente......!");
+    // printf("Servidor Respondendo o Cliente......!");
     
-    send(cliente_fd, buff, strlen(buff), 0);
+    // send(cliente_fd, buff, strlen(buff), 0);
     
-    close(cliente_fd);
+    // close(cliente_fd);
     
-    shutdown((server_fd), SHUT_RDWR);
+    // shutdown((server_fd), SHUT_RDWR);
 
     return 0;
 
