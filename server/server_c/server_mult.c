@@ -18,6 +18,9 @@ int main(){
         .sin_port = htons(PORT)
     };
 
+    // Configurar o tratamento do sinal SIGINT (Ctrl+C)
+    signal(SIGINT, sigint_handler);   
+
     int server_fd;
 
     if((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
@@ -44,7 +47,7 @@ int main(){
     int cliente_fd[MAXCLIENT];
 
     for (i = 0; i < MAX_CLIENTS; i++) {
-        clients[i] = -1;
+        cliente_fd[i] = -1;
     }
 
     char buffer[MAXCHAR];
@@ -58,7 +61,8 @@ int main(){
     while (1){
         if((cliente_fd[i] = accept(server_fd, (struct sockaddr*)&cliente_address, &addrlen_size)) < 0){
             perror("Falha no Accept!!");
-            exit(EXIT_FAILURE);
+            continue;
+            //exit(EXIT_FAILURE);
         }else{
             recv(cliente_fd[i], name, MAXCHAR, 0);
             printf("%s Conectado!!\n", name);

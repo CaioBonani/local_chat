@@ -4,32 +4,47 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
-#include <paths.h>
 #include <pthread.h>
 
-#define MAXCHAR 1024
+#define MAXCHAR 500
+#define MAXCLIENT 5
+#define MAXNAME 50
 #define PORT 8080
 
 char buffer[MAXCHAR];
+int cliente_fd[MAXCLIENT];
+int num_clients = 0;
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
-int i = 0;
+// Função para tratar mensagens de um cliente
+void *handle_client(void *arg) {
+    int client_index = *((int *)arg);
+    char buffer[MAXCHAR];
 
-void * RecebeMensagem(void *arg){
-    int cliente_fd = *((int *)arg);
-    recv(cliente_fd, buffer, MAXCHAR, 0);
-    //read(cliente_fd, buff, MAXCHAR);
-    printf("Servidor --> Requisição Feita ao Servidor n %d = %s\n", i, buffer);
-    //pthread_mutex_lock(&lock);
-    char buff[MAXCHAR] = "Mensagem Teste Recebida!!!";
-    //pthread_mutex_lock(&lock);
-    //sleep(0.3);
-    printf("Servidor Respondendo o Cliente......!\n");
+    while (1) {
+        ssize_t bytes_received = recv(cliente_fd[client_index], buffer, sizeof(buffer), 0);
+        if (bytes_received <= 0) {
+            // O cliente se desconectou ou ocorreu um erro na recepção
+            printf("Cliente %d desconectado.\n", client_index);
+            close(cliente_fd[client_index]);
+            break;
+        }
 
-    send(cliente_fd, buff, strlen(buff), 0);
-    //free(buff);
-    printf("Exit socketThread \n");
+        // Adicione um caractere nulo de terminação à mensagem recebida
+        buffer[bytes_received] = '\0';
+
+        // Envie a mensagem para todos os outros clientes conectados
+        for (int i = 0; i < num_clients; i++) {
+            if (i != client_index) {
+                send(cliente_fd[i], buffer, strlen(buffer), 0);
+            }
+        }
+    }
+
+    // Marque a entrada como vazia
+    cliente_fd[client_index] = -1;
+    num_clients--;
     pthread_exit(NULL);
 }
 
@@ -43,54 +58,59 @@ int main() {
     int server_fd;
 
     if((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
-        printf("Erro No Socket!\n");
+        perror("Erro No Socket!\n");
         exit(EXIT_FAILURE);
     }
 
     int addrlen = sizeof(server_address);
 
     if(bind(server_fd, (struct sockaddr*)&server_address, addrlen) < 0){
-        printf("Falha no Bind!!\n");
+        perror("Falha no Bind!!\n");
         exit(EXIT_FAILURE);
     }
 
     printf("Socket vinculado na porta: %d\n", PORT);
 
-    if(listen(server_fd, 10) < 0){
-        printf("Falha no Listen!!\n");
+    if(listen(server_fd, MAXCLIENT) < 0){
+        perror("Falha no Listen!!\n");
         exit(EXIT_FAILURE);
     }
 
     printf("Listening...\n");
 
-    int cliente_fd;
-
     struct sockaddr_in cliente_address;
 
     socklen_t addrlen_size;
 
-    addrlen_size = sizeof(cliente_address);
-
-    if((cliente_fd = accept(server_fd, (struct sockaddr*)&cliente_address, &addrlen_size)) < 0){
-        printf("Falha no Accept!!\n");
-        exit(EXIT_FAILURE);
-    }
-
-    //Até aqui é igual, porque conecta  apenas um cliente, se fossem vários clientes,
-    //a partir do listening que estaria dentro do while
-    pthread_t thread_id[10];
-
-    while(i < 10){
-        if(pthread_create(&thread_id[i], NULL, RecebeMensagem, (void *)&cliente_fd) < 0){
-            printf("Falha ao criar o
-            Thread!!\n");
+    while (1) {
+        // Aceitar a conexão do cliente
+        if ((cliente_fd[num_clients] = accept(server_fd, (struct sockaddr *)&cliente_address, &addrlen_size)) < 0) {
+            perror("Falha no Accept!!");
+            exit(EXIT_FAILURE);
+        }else{
+            recv(cliente_fd[num_clients], name, MAXNAME, 0);
+            printf("%s Conectado!!\n", name);
         }
-        pthread_join(thread_id[i],NULL);
-        i++;
+
+        // Crie uma nova thread para lidar com o cliente
+        pthread_t thread;
+        int *client_index = malloc(sizeof(int));
+
+        *client_index = num_clients;
+        if(pthread_create(&thread, NULL, handle_client, client_index) < 0){
+            printf("Falha ao criar o Thread!!\n");
+        };
+
+        pthread_join(thread, NULL);
+
+        // Aumente o contador de clientes
+        num_clients++;
     }
-    
-    close(cliente_fd);
-    shutdown((server_fd), SHUT_RDWR);
-    printf("Servidor Fechado!!\n");
+
+    if(num_clients == 0){
+        shutdown(server_fd, SHUT_RDWR);
+        printf("Servidor Fechado!!\n");
+    }
+
     return 0;
 }
