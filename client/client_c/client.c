@@ -6,7 +6,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-
 #define MAXNAME 50
 #define MAXCHAR 500
 #define PORT 8080
@@ -49,7 +48,9 @@ int main(){
 
     while(1){
         printf("Digite a Mensagem: ");
-        scanf("%s", buff);
+
+        fgets(buff, sizeof(buff), stdin);
+        buff[strcspn(buff, "\n")] = '\0';
 
         if(strcmp(buff, "Exit") == 0){
             strcpy(buff, "Desconectado do Servidor...\n");
@@ -62,6 +63,7 @@ int main(){
          
         if(read(server, buff, MAXCHAR) > 0)    
             printf("%s\n",buff );
+
     }
 
     close(cliente_fd);
