@@ -59,10 +59,9 @@ int main(){
         }
 
         send(server, buff, strlen(buff), 0);
-
-        char buffer[MAXCHAR];
-        read(server, buffer, MAXCHAR);
-        printf("%s\n",buffer );
+         
+        if(read(server, buff, MAXCHAR) > 0)    
+            printf("%s\n",buff );
     }
 
     close(cliente_fd);
