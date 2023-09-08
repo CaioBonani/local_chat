@@ -1,8 +1,6 @@
 /client/client_rust/target/
 /server/server_rust/target/
-# Arquivos executáveis do GCC
+# Arquivos executáveis
 *.out
-*.elf
-*.exe
 a.out
-*.jar
+*.class
