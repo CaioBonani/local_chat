@@ -16,10 +16,11 @@ void *receive_messages(void *socket) {
     char buff[MAXCHAR];
     
     while (1) {
-        if (recv(server, buff, MAXCHAR, 0) < 0) {
+        if (recv(server, buff, sizeof(buff), 0) < 0) {
             break;
         }
         
+        buff[strcspn(buff, "\n")] = '\0';
         printf("%s\n", buff);
     }
     
@@ -92,7 +93,7 @@ int main() {
     }
 
     // Espere a thread de recebimento terminar
-    pthread_join(receive_thread, NULL);
+    //pthread_join(receive_thread, NULL);
     close(cliente_fd);
 
     return 0;
