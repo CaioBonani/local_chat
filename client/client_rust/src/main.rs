@@ -48,22 +48,22 @@ fn main() -> io::Result<()> {
     
     let mut stream = TcpStream::connect(server_address)?;
     println!("Connected to server at {}", server_address);
-
+    
     // Clone the stream for using in the read_messages function, because rust can only have one owner (function) of a resource
     let reader_stream = stream.try_clone()?;
-
+    
     // Spawn a thread to read messages from the server
-    thread::spawn(move || {
+    thread::spawn( move || {
 
         print!("User: ");
-        io::stdout().flush().unwrap();
+        io::stdout().flush().unwrap(); // Flush stdout to make sure the print! macro is executed before reading input
     
         read_messages(reader_stream);
     });
 
     // Read user input and send it to the server
     let mut input = String::new();
-
+    
     loop {
 
         io::stdin().read_line(&mut input)?;
