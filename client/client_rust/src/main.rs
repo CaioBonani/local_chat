@@ -19,7 +19,7 @@ fn read_messages(mut stream: TcpStream) {
             // If the server sends a message
             Ok(bytes_read) if bytes_read > 0 => {
                 
-                let message = String::from_utf8_lossy(&buffer[..bytes_read]);
+                let message = String::from_utf8_lossy(&buffer[..bytes_read]).trim_end_matches('\n').to_string();
                 println!("{}", message);
             }
 

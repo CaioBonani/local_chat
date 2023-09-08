@@ -19,7 +19,7 @@ int main(){
     };
 
     // Configurar o tratamento do sinal SIGINT (Ctrl+C)
-    signal(SIGINT, sigint_handler);   
+    // signal(SIGINT, sigint_handler); 
 
     int server_fd;
 
@@ -46,7 +46,7 @@ int main(){
 
     int cliente_fd[MAXCLIENT];
 
-    for (i = 0; i < MAX_CLIENTS; i++) {
+    for (int i = 0; i < MAXCLIENT; i++) {
         cliente_fd[i] = -1;
     }
 
