@@ -7,17 +7,18 @@
 #include <netinet/in.h>
 #include <pthread.h> // Adicionar a inclusão da biblioteca pthread
 
-#define MAXNAME 50
-#define MAXCHAR 500
+#define MAXNAME 100
+#define MAXCHAR 1024
 #define PORT 8080
 
-void *receive_messages(void *arg) {
-    int server = *(int *)arg;
+void *receive_messages(void *socket) {
+    int server = *(int *)socket;
     char buff[MAXCHAR];
     
     while (1) {
-        if (read(server, buff, MAXCHAR) <= 0)
+        if (recv(server, buff, MAXCHAR, 0) < 0) {
             break;
+        }
         
         printf("%s\n", buff);
     }
@@ -53,14 +54,17 @@ int main() {
     char user[MAXNAME];
 
     printf("Digite o seu usuário: ");
-    scanf("%s", user);
-    send(server, user, strlen(user), 0);
+    fgets(user, sizeof(user), stdin);
+    user[strcspn(user, "\n")] = '\0';
 
-    printf("PARABÉNS %s .... Você está conectado no Servidor...\n", user);
+    if(send(server, user, strlen(user), 0) < 0){
+      perror("Erro ao enviar a mensagem...");
+      exit(EXIT_FAILURE);
+    }
+
+    printf("%s conectado no Servidor...\n", user);
 
     pthread_t receive_thread;
-    
-    // Crie uma thread para receber mensagens do servidor
     if (pthread_create(&receive_thread, NULL, receive_messages, &server) != 0) {
         perror("Erro ao criar thread de recebimento");
         exit(EXIT_FAILURE);
@@ -69,23 +73,26 @@ int main() {
     char buff[MAXCHAR];
 
     while (1) {
-        printf("Digite a Mensagem: ");
+        //printf("Digite a Mensagem: ");
         fgets(buff, sizeof(buff), stdin);
         buff[strcspn(buff, "\n")] = '\0';
 
         if (strcmp(buff, "Exit") == 0) {
-            strcpy(buff, "Desconectado do Servidor...\n");
+            strcpy(buff, " Desconectado do Servidor...\n");
             printf("%s\n", buff);
-            send(server, buff, strlen(buff), 0);
+          
+            send(server, strcat(user, buff), strlen(buff), 0);
             break;
         }
 
-        send(server, buff, strlen(buff), 0);
+        if(send(server, buff, strlen(buff), 0) < 0){
+          perror("Erro ao enviar a mensagem...");
+          exit(EXIT_FAILURE);
+        }
     }
 
     // Espere a thread de recebimento terminar
     pthread_join(receive_thread, NULL);
-
     close(cliente_fd);
 
     return 0;

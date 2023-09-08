@@ -7,7 +7,6 @@
 #include <paths.h>
 
 #define MAXCHAR 250
-#define MAXNAME 50
 #define MAXCLIENT 100
 #define PORT 8080
 
@@ -42,13 +41,7 @@ int main(){
     printf("Listening...\n");
 
     int cliente_fd[MAXCLIENT];
-
-    for (i = 0; i < MAX_CLIENTS; i++) {
-        clients[i] = -1;
-    }
-
     char buffer[MAXCHAR];
-    char name[MAXNAME];
 
     struct sockaddr_in cliente_address;
     socklen_t addrlen_size;
@@ -60,38 +53,26 @@ int main(){
             perror("Falha no Accept!!");
             exit(EXIT_FAILURE);
         }else{
-            recv(cliente_fd[i], name, MAXCHAR, 0);
-            printf("%s Conectado!!\n", name);
+            recv(cliente_fd[i], buffer, MAXCHAR, 0);
+            printf("%s Conectado!!\n", buffer);
+            i++;
         }
 
-        while (1) {
-            if (recv(cliente_fd[i], buffer, MAXCHAR, 0) < 0) {
-                // O cliente se desconectou ou ocorreu um erro na recepção
-                printf("Erro ao receber mensagem de %s\n .....", name);
-                perror(": ");
-                close(cliente_fd[i]);
-                break;
-            }
+        recv(cliente_fd[i], buffer, MAXCHAR, 0);
 
-            //printf("%s: %s\n", user, buffer);
-
-            if(strcmp(buffer, "Desconectado do Servidor...") == 0){
-                i--;
+        for (int j = 0; j < i + 1; j++){
+            if (j != i){
+                send(cliente_fd[j], buffer, strlen(buffer), 0);
             }
+        }
 
-            // Envie a mensagem para todos os outros clientes conectados
-            for (int j = 0; j < i + 1; j++){
-                if (j != i){
-                    send(cliente_fd[j], buffer, strlen(buffer), 0);
-                }
-            }
+        if(strcmp(buffer, "Desconectado do Servidor...")){
+            i--;
         }
 
         if (i == 0){
             break;
         }
-
-        i++;
     }
 
     shutdown((server_fd), SHUT_RDWR);
