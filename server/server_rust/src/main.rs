@@ -66,7 +66,7 @@ fn handle_client(mut stream: TcpStream, clients: Arc<Mutex<Vec<TcpStream>>>) {
     {
         let mut clients = clients.lock().unwrap();
 
-        clients.retain(|client| client.peer_addr().is_ok() && client.peer_addr().unwrap() != stream.peer_addr().unwrap()); 
+        clients.retain(|client| client.peer_addr().is_ok() && client.peer_addr().unwrap() != stream.peer_addr().unwrap()); //estudar
 
         println!("{} disconnected.", client_name);
 
@@ -92,10 +92,14 @@ fn broadcast_message(clients: &Arc<Mutex<Vec<TcpStream>>>, message: String, send
 
 fn main() {
 
-    let listener = TcpListener::bind("127.0.0.1:8080").expect("Failed to bind address"); // Bind the server to the address
+    const PORTA: &str = "8080";
+    // const IP: &str = "192.168.15.7";
+    const IP: &str = "127.0.0.1";
+
+    let listener = TcpListener::bind(IP.to_owned() + ":" + PORTA).expect("Failed to bind address"); // Bind the server to the address
     let clients = Arc::new(Mutex::new(Vec::new())); // Create a vector to store the clients, this vector will be shared between threads, so it needs to be wrapped in an Arc and Mutex
 
-    println!("Server listening on 127.0.0.1:8080");
+    println!("Server listening on {}:{}", IP, PORTA);
 
     for stream in listener.incoming() { // Iterate over the incoming connections
 
@@ -117,6 +121,5 @@ fn main() {
             }
         }
 
-        let mut buffer = [0; 1024];
     }
 }
