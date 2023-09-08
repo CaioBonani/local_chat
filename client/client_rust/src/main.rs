@@ -44,10 +44,12 @@ fn read_messages(mut stream: TcpStream) {
 
 fn main() -> io::Result<()> {
 
-    let server_address = "127.0.0.1:8080";
+    let ip = "127.0.0.1";
+
+    let porta = "8080";
     
-    let mut stream = TcpStream::connect(server_address)?;
-    println!("Connected to server at {}", server_address);
+    let mut stream = TcpStream::connect(ip.to_owned() + ":" + porta)?;
+    println!("Connected to server at {}", ip);
     
     // Clone the stream for using in the read_messages function, because rust can only have one owner (function) of a resource
     let reader_stream = stream.try_clone()?;

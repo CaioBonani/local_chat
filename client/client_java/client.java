@@ -9,8 +9,12 @@ public class client {
 
     public static void main(String[] args) {
 
+        String ip = "127.0.0.1";
+        // String ip = ".....";
+        int porta = 8080;
+
         try (//cria um socket para se conectar ao servidor
-            Socket echoSocket = new Socket("127.0.0.1", 8080);
+            Socket echoSocket = new Socket(ip, porta);
             PrintWriter out = new PrintWriter(echoSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(echoSocket.getInputStream()));
             BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in))
