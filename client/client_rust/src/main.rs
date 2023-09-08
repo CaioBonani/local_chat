@@ -64,7 +64,7 @@ fn main() -> io::Result<()> {
     });
 
     // Read user input and send it to the server
-    let mut input = String::new();
+    let mut input= String::new();
     
     loop {
 
@@ -73,3 +73,4 @@ fn main() -> io::Result<()> {
         input.clear();
     }
 }
+
