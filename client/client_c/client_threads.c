@@ -92,7 +92,7 @@ int main() {
     }
 
     // Espere a thread de recebimento terminar
-    pthread_join(receive_thread, NULL);
+    //pthread_join(receive_thread, NULL);
     close(cliente_fd);
 
     return 0;
