@@ -21,10 +21,18 @@ int server_fd;
 void *handle_client(void *arg) {
   int client_fd = *(int *)arg;
   char buffer[MAXCHAR];
+  char user[MAXNAME];
+  char msg[MAXCHAR];
+
+  if(recv(client_fd, user, sizeof(user), 0) < 0){
+    pthread_exit(NULL);
+  }
+  
+  user[strcspn(user, "\n")] = '\0';
+  printf("%s Conectado!!\n", user);
 
   while (1) {
-      int read_size = recv(client_fd, buffer, sizeof(buffer), 0);
-    
+      int read_size = recv(client_fd, buffer, sizeof(buffer), 0);    
       if (read_size <= 0) {
           // Cliente desconectou ou erro
           int i;
@@ -37,11 +45,16 @@ void *handle_client(void *arg) {
           break;
       }
 
+      strcpy(msg, user);
+      strcat(msg, ": ");
+      strcat(msg, buffer);
+      printf("%s", msg);
+
       // Transmitir a mensagem para todos os clientes conectados
       int i;
       for (i = 0; i < num_clients; i++) {
           if (clients[i] != client_fd) {
-              send(clients[i], buffer, read_size, 0);
+              send(clients[i], msg, sizeof(msg), 0);
           }
       }
   }
@@ -97,7 +110,6 @@ int main(){
     socklen_t addrlen_size;
 
     while (1){
-      char user[MAXNAME];
       int client_fd = accept(server_fd, (struct sockaddr*)&cliente_address, &addrlen_size);
   
       if(client_fd < 0){
@@ -113,34 +125,16 @@ int main(){
 
       clients[num_clients] = client_fd;
       num_clients++;
-
+     
       // Criar uma thread para lidar com o cliente
       if (pthread_create(&threads[num_clients - 1], NULL, handle_client, &client_fd) != 0){
           perror("Erro ao criar a thread do cliente");
           break;
       }
 
-      recv(client_fd, user, MAXCHAR, 0);
-      printf("%s Conectado!!\n", user);
-
-      // while(1){
-      //   recv(cliente_fd, buffer, MAXCHAR, 0);
-        
-      //   if(strcmp(buffer, "Desconectado do Servidor...")){
-      //       i--;
-      //   }
-      // }
-
-      // // for (int j = 0; j < i + 1; j++){
-      // //     if (j != i){
-      // //         send(cliente_fd[j], buffer, strlen(buffer), 0);
-      // //     }
-      // // }
-
-
-      // if (i == 0){
-      //     break;
-      // }
+      if (num_clients == 0){
+          break;
+      }
     }
 
     // Fechar sockets e threads quando o servidor for encerrado
@@ -153,5 +147,4 @@ int main(){
     // shutdown((server_fd), SHUT_RDWR);
 
     return 0;
-
 }
