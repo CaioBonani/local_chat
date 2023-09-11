@@ -4,13 +4,12 @@
 
 */
 
-//remove warnings from all the code
-#![allow(warnings)]
-
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::thread;
 use std::sync::{Arc, Mutex};
+use std::time;
+use chrono;
 
 struct Client {
 
@@ -19,7 +18,7 @@ struct Client {
 }
 
 //Function to handle each client, take the stream and the list of clients as arguments
-fn handle_client(mut stream: TcpStream, all_clients: Arc<Mutex<Vec<Client>>>) {
+fn handle_client(mut stream: TcpStream, all_clients: Arc<Mutex<Vec<Client>>>, now: time::Instant) {
 
     let mut buffer = [0; 1024]; // Buffer to store the client's messages, 1024 bytes long
     let mut client_name = String::new(); // String to store the client's name
@@ -64,7 +63,7 @@ fn handle_client(mut stream: TcpStream, all_clients: Arc<Mutex<Vec<Client>>>) {
 
                 println!("Received from {}: {}", name_clone, message);
               
-                broadcast_message(&all_clients, name_clone, message, &stream); // Broadcast the client's message to all connected clients
+                broadcast_message(&all_clients, name_clone, message, &stream, now); // Broadcast the client's message to all connected clients
 
             }
 
@@ -91,15 +90,11 @@ fn handle_client(mut stream: TcpStream, all_clients: Arc<Mutex<Vec<Client>>>) {
     }
 }
 
-fn broadcast_message(all_clients: &Arc<Mutex<Vec<Client>>>, client_name: String, message: String, mut sender: &TcpStream) {
+fn broadcast_message(all_clients: &Arc<Mutex<Vec<Client>>>, client_name: String, message: String, mut sender: &TcpStream, now: time::Instant) {
 
     let mut all_clients = all_clients.lock().unwrap();
 
     let msg = message.trim();
-
-    let mute = msg.contains("/mute ");
-
-    println!("mute: {}", mute);
 
     match msg {
 
@@ -107,7 +102,6 @@ fn broadcast_message(all_clients: &Arc<Mutex<Vec<Client>>>, client_name: String,
 
             //vector to store the names of the clients
             let mut names: Vec<String> = Vec::new();
-            let mut ips: Vec<String> = Vec::new();
 
             for client in all_clients.iter(){
 
@@ -124,7 +118,26 @@ fn broadcast_message(all_clients: &Arc<Mutex<Vec<Client>>>, client_name: String,
 
             sender.write_all(b"[HELP] - Commands:\n").unwrap(); // Write the client's name to the client
             sender.write_all(b"\n/list - list all clients\n").unwrap(); // Write the client's name to the client
+            sender.write_all(b"/time - show the time passed since the server started\n").unwrap(); // Write the client's name to the client
+            sender.write_all(b"/date - show the current date and time\n").unwrap(); // Write the client's name to the client
             sender.write_all(b"/help - list all commands\n").unwrap(); // Write the client's name to the client
+        }
+
+        "/time" => {
+
+            //show the time passed since the server started
+            let time = time::Instant::now().duration_since(now).as_secs();
+
+            let time = format!("Server running {} seconds ago. ", time);
+
+            sender.write_all(time.as_bytes()).unwrap(); // Write the client's name to the client
+        }
+
+        "/date" => {
+
+            let date = chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
+
+            sender.write_all(date.as_bytes()).unwrap(); // Write the client's name to the client
         }
 
         _ => {
@@ -141,6 +154,9 @@ fn broadcast_message(all_clients: &Arc<Mutex<Vec<Client>>>, client_name: String,
 }
 
 fn main() {
+
+    //count time
+    let now = time::Instant::now();
 
     const PORTA: &str = "8080";
     // const IP: &str = "192.168.15.7";
@@ -163,7 +179,7 @@ fn main() {
                 // Spawn a new thread to handle each client
                 thread::spawn( move || {
                     
-                    handle_client(stream, all_clients_clone);
+                    handle_client(stream, all_clients_clone, now);
                 });
             }
 
