@@ -9,9 +9,9 @@ public class client {
 
     public static void main(String[] args) {
 
-        String ip = "127.0.0.1";
+        String ip = "172.21.219.101";
         // String ip = ".....";
-        int porta = 8080;
+        int porta = 39999;
 
         try (//cria um socket para se conectar ao servidor
             Socket echoSocket = new Socket(ip, porta);

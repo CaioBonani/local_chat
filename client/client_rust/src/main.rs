@@ -44,9 +44,9 @@ fn read_messages(mut stream: TcpStream) {
 
 fn main() -> io::Result<()> {
 
-    let ip = "127.0.0.1";
+    let ip = "172.21.219.101";
 
-    let porta = "8080";
+    let porta = "39999";
     
     let mut stream = TcpStream::connect(ip.to_owned() + ":" + porta)?;
     println!("Connected to server at {}", ip);

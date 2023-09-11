@@ -10,8 +10,8 @@
 #define MAXNAME 100
 #define MAXCHAR 1024
 
-#define PORT 8080
-#define ip "127.0.0.1"
+#define PORT 39999
+#define ip "172.21.219.101"
 // #define ip "....."
 
 void *receive_messages(void *socket) {

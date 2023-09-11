@@ -158,9 +158,9 @@ fn main() {
     //count time
     let now = time::Instant::now();
 
-    const PORTA: &str = "8080";
-    // const IP: &str = "192.168.15.7";
-    const IP: &str = "127.0.0.1";
+    const PORTA: &str = "39999";
+    const IP: &str = "172.21.219.101";
+    // const IP: &str = "127.0.0.1";
 
     let listener = TcpListener::bind(IP.to_owned() + ":" + PORTA).expect("Failed to bind address"); // Bind the server to the address
 

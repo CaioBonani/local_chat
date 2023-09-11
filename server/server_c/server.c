@@ -11,7 +11,7 @@
 #define MAXCHAR 1024
 #define MAXNAME 100
 #define MAXCLIENT 10
-#define PORT 8080
+#define PORT 39999
 
 int clients[MAXCLIENT];
 pthread_t threads[MAXCLIENT];
@@ -72,7 +72,7 @@ void sigint_handler(int signal) {
 int main(){
     struct sockaddr_in server_address = {
         .sin_family = AF_INET,
-        .sin_addr.s_addr = INADDR_ANY,
+        .sin_addr.s_addr = inet_addr("172.21.219.101"),
         .sin_port = htons(PORT)
     };
 
